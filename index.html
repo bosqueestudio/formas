@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Formas Orgánicas - Merge Canvas</title>
+    <title>Generador Orgánico Pro - Modo Oscuro</title>
     <style>
         :root {
-            --bg-color: #f5f5f5;
-            --panel-bg: #ffffff;
-            --text-color: #000000;
+            --bg-dark: #0d0d0d;
+            --panel-bg: #1a1a1a;
+            --text-light: #ffffff;
+            --border-color: #333333;
         }
 
         * {
@@ -21,95 +22,99 @@
             padding: 0;
             width: 100vw;
             height: 100vh;
-            background-color: var(--bg-color);
+            background-color: var(--bg-dark);
             display: flex;
             overflow: hidden;
+            color: var(--text-light);
         }
 
-        /* BARRA DE HERRAMIENTAS (UI/UX) */
+        /* UI/UX: PANEL LATERAL OSCURO */
         .toolbar {
-            width: 280px;
+            width: 300px;
             background: var(--panel-bg);
-            border-right: 2px solid #000;
-            padding: 30px 20px;
+            border-right: 1px solid var(--border-color);
+            padding: 25px 20px;
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            gap: 20px;
             z-index: 10;
-            box-shadow: 5px 0 15px rgba(0,0,0,0.02);
+            overflow-y: auto;
         }
 
         h2 {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin: 0 0 10px 0;
-            border-bottom: 2px solid #000;
+            letter-spacing: 1.5px;
+            margin: 0 0 5px 0;
+            border-bottom: 1px solid var(--border-color);
             padding-bottom: 10px;
+            color: #fff;
         }
 
         .tool-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
+        }
+
+        .color-pickers {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
         }
 
         label {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             font-weight: bold;
             text-transform: uppercase;
-            color: #555;
+            color: #888;
         }
 
         select, input[type="color"], button {
             width: 100%;
-            padding: 12px;
-            font-size: 0.95rem;
-            border: 2px solid #000;
-            background: #fff;
+            padding: 10px;
+            font-size: 0.9rem;
+            border: 1px solid var(--border-color);
+            background: #222;
+            color: #fff;
             cursor: pointer;
-            border-radius: 0;
             outline: none;
             transition: all 0.2s ease;
         }
 
         select:hover, button:hover {
-            background: #f0f0f0;
+            background: #2a2a2a;
+            border-color: #555;
         }
 
         input[type="color"] {
-            height: 50px;
+            height: 40px;
             padding: 2px;
+            border-radius: 4px;
         }
 
-        button.btn-save {
-            background: #000;
-            color: #fff;
-            margin-top: auto;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        /* BOTONES DE ACCIÓN */
+        .btn-clear { color: #ff5555; border-color: #552222; }
+        .btn-clear:hover { background: #331111; }
+        
+        .btn-action { background: #ffffff; color: #000000; font-weight: bold; text-transform: uppercase; }
+        .btn-action:hover { background: #dddddd; }
+
+        .btn-anim { background: #007bff; color: white; font-weight: bold; text-transform: uppercase;}
+        .btn-anim:hover { background: #0056b3; }
+
+        .download-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
         }
 
-        button.btn-save:hover {
-            background: #333;
-        }
-
-        button.btn-clear {
-            background: #fff;
-            color: #ff4444;
-            border-color: #ff4444;
-        }
-        button.btn-clear:hover {
-            background: #fff5f5;
-        }
-
-        /* ÁREA DEL LIENZO */
+        /* LIENZO PRINCIPAL */
         .canvas-container {
             flex-grow: 1;
             height: 100%;
             position: relative;
-            background: #ffffff;
+            background: var(--bg-dark);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -128,20 +133,21 @@
             position: absolute;
             bottom: 20px;
             right: 20px;
-            font-size: 0.8rem;
-            color: #888;
+            font-size: 0.75rem;
+            color: #555;
             pointer-events: none;
             text-transform: uppercase;
+            letter-spacing: 1px;
         }
     </style>
 </head>
 <body>
 
     <div class="toolbar">
-        <h2>Creador de Blobs</h2>
+        <h2>Blob Generator OS</h2>
         
         <div class="tool-group">
-            <label for="pixel-shape">Forma del Píxel</label>
+            <label>Forma del Píxel</label>
             <select id="pixel-shape">
                 <option value="circle">Círculo</option>
                 <option value="square">Cuadrado</option>
@@ -150,26 +156,58 @@
         </div>
 
         <div class="tool-group">
-            <label for="fill-color">Color de Relleno</label>
-            <input type="color" id="fill-color" value="#f4f3b6">
+            <label>Combinación de Colores</label>
+            <div class="color-pickers">
+                <div>
+                    <label style="font-size:10px;">Centro</label>
+                    <input type="color" id="color-center" value="#f4f3b6">
+                </div>
+                <div>
+                    <label style="font-size:10px;">Eco 1</label>
+                    <input type="color" id="color-echo1" value="#e3a7fd">
+                </div>
+                <div>
+                    <label style="font-size:10px;">Eco 2</label>
+                    <input type="color" id="color-echo2" value="#9ef8db">
+                </div>
+            </div>
         </div>
 
         <div class="tool-group">
-            <label for="pixel-size">Tamaño de la Forma</label>
+            <label>Escala Base</label>
             <select id="pixel-size">
-                <option value="40">Pequeño</option>
-                <option value="80" selected>Mediano</option>
-                <option value="130">Grande</option>
+                <option value="50">Fino</option>
+                <option value="90" selected>Estándar</option>
+                <option value="150">Masivo</option>
             </select>
         </div>
 
+        <div class="tool-group">
+            <label>Imperfección / Torpeza</label>
+            <select id="brush-clumsy">
+                <option value="0.2">Sutil</option>
+                <option value="0.5" selected>Orgánica Orgullosa</option>
+                <option value="0.9">Torpe / Salvaje</option>
+            </select>
+        </div>
+
+        <hr style="border:0; border-top: 1px solid var(--border-color); width:100%; margin: 5px 0;">
+
         <button class="btn-clear" onclick="clearCanvas()">Limpiar Lienzo</button>
-        <button class="btn-save" onclick="saveAsset()">Guardar Asset (.PNG)</button>
+        <button class="btn-anim" onclick="playDrawingAnimation()">▶ Re-Animar Trazo</button>
+        
+        <div class="tool-group">
+            <label>Exportar Formatos Estáticos</label>
+            <div class="download-grid">
+                <button class="btn-action" style="font-size:11px;" onclick="saveAsset('16:9')">16:9 (HD)</button>
+                <button class="btn-action" style="font-size:11px;" onclick="saveAsset('3:5')">3:5 (Vertical)</button>
+            </div>
+        </div>
     </div>
 
     <div class="canvas-container" id="canvas-holder">
         <canvas id="paintCanvas"></canvas>
-        <div class="status-info">Dibuja lento para formas fluidas</div>
+        <div class="status-info" id="status-text">Lienzo Oscuro Activo</div>
     </div>
 
     <script>
@@ -177,170 +215,61 @@
         const ctx = canvas.getContext('2d');
         const container = document.getElementById('canvas-holder');
 
-        // Canvas oculto (Buffer) para lograr el efecto de fusión (Merge)
-        const bufferCanvas = document.createElement('canvas');
-        const bCtx = bufferCanvas.getContext('2d');
-
-        const shapeSelect = document.getElementById('pixel-shape');
-        const colorInput = document.getElementById('fill-color');
-        const sizeSelect = document.getElementById('pixel-size');
-
+        // Estructura de memoria para guardar el historial del trazo (necesario para re-animar)
+        let strokeHistory = []; 
         let isDrawing = false;
-        let lastX = 0;
-        let lastY = 0;
+
+        // Variables de físicas de suavizado (Filtro de torpeza sutil)
+        let clumsyX = 0, clumsyY = 0;
 
         function resizeCanvas() {
-            const w = container.clientWidth;
-            const h = container.clientHeight;
-            
-            canvas.width = w;
-            canvas.height = h;
-            bufferCanvas.width = w;
-            bufferCanvas.height = h;
-            
-            clearCanvas();
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            resetCanvasBackground(ctx, canvas.width, canvas.height);
+            redrawFromHistory();
         }
 
         window.addEventListener('resize', resizeCanvas);
         window.addEventListener('DOMContentLoaded', resizeCanvas);
 
-        function drawDiamondPath(context, x, y, size) {
+        function resetCanvasBackground(context, width, height) {
+            context.fillStyle = "#0d0d0d"; // Fondo oscuro estricto
+            context.fillRect(0, 0, width, height);
+        }
+
+        // --- SISTEMA DE DIBUJO DE ECOS TRIPLE ---
+        function drawEchos(context, x, y, shape, size, cCenter, cEcho1, cEcho2, drawStroke = true) {
+            context.save();
+            
+            // Configuración del stroke global
+            if(drawStroke) {
+                context.strokeStyle = '#000000';
+                context.lineWidth = 1;
+            }
+
+            // Eco Exterior 2
+            context.fillStyle = cEcho2;
+            renderSingleGeom(context, x, y, shape, size * 1.3);
+            if(drawStroke) context.stroke();
+
+            // Eco Interior 1
+            context.fillStyle = cEcho1;
+            renderSingleGeom(context, x, y, shape, size * 1.15);
+            if(drawStroke) context.stroke();
+
+            // Núcleo Centro
+            context.fillStyle = cCenter;
+            renderSingleGeom(context, x, y, shape, size);
+            if(drawStroke) context.stroke();
+
+            context.restore();
+        }
+
+        function renderSingleGeom(context, x, y, shape, size) {
             context.beginPath();
-            context.moveTo(x, y - size / 2);
-            context.lineTo(x + size / 2, y);
-            context.lineTo(x, y + size / 2);
-            context.lineTo(x - size / 2, y);
-            context.closePath();
-        }
-
-        // Dibuja la forma individual en el buffer oculto (solo el relleno)
-        function drawShapeOnBuffer(x, y) {
-            const shape = shapeSelect.value;
-            const size = parseInt(sizeSelect.value);
-            
-            bCtx.fillStyle = colorInput.value;
-
             if (shape === 'circle') {
-                bCtx.beginPath();
-                bCtx.arc(x, y, size / 2, 0, Math.PI * 2);
-                bCtx.fill();
+                context.arc(x, y, size / 2, 0, Math.PI * 2);
             } else if (shape === 'square') {
-                bCtx.beginPath();
-                bCtx.rect(x - size / 2, y - size / 2, size, size);
-                bCtx.fill();
+                context.rect(x - size / 2, y - size / 2, size, size);
             } else if (shape === 'diamond') {
-                drawDiamondPath(bCtx, x, y, size);
-                bCtx.fill();
-            }
-        }
-
-        // Renderiza el buffer en la pantalla aplicando el contorno negro (Merge Effect)
-        function renderBufferToMain() {
-            // Limpiamos el lienzo visible con fondo blanco
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Filtro avanzado por código: Para pintar el stroke exterior de 1px sin interceptar el interior,
-            // dibujamos el buffer original encima de sí mismo desplazado sutilmente, o usamos la técnica de stroke vectorial.
-            // Para mantener performance óptimo y bordes limpios en tiempo real:
-            ctx.drawImage(bufferCanvas, 0, 0);
-
-            // Generamos el contorno negro exterior de 1px usando composición de trazo
-            ctx.shadowColor = '#000000';
-            ctx.shadowBlur = 1;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 0;
-            
-            // Redibujamos la silueta para marcar el borde perimetral
-            ctx.drawImage(bufferCanvas, 0, 0);
-            
-            // Reseteamos sombras para no afectar otros renders
-            ctx.shadowBlur = 0;
-        }
-
-        // Interpolación lineal para rellenar los huecos vacíos del trackpad (Evita el scattering)
-        function drawInterpolated(startX, startY, endX, endY) {
-            const distance = Math.hypot(endX - startX, endY - startY);
-            // Definimos que estampe una figura mínimo cada 2 píxeles de movimiento para pegarlas por completo
-            const steps = Math.max(Math.floor(distance / 2), 1); 
-
-            for (let i = 0; i < steps; i++) {
-                const t = i / steps;
-                const x = startX + (endX - startX) * t;
-                const y = startY + (endY - startY) * t;
-                drawShapeOnBuffer(x, y);
-            }
-            
-            renderBufferToMain();
-        }
-
-        // --- MANEJADORES DE EVENTOS ---
-
-        function getCoords(e) {
-            const rect = canvas.getBoundingClientRect();
-            if (e.touches && e.touches.length > 0) {
-                return {
-                    x: e.touches[0].clientX - rect.left,
-                    y: e.touches[0].clientY - rect.top
-                };
-            }
-            return {
-                x: e.clientX - rect.left,
-                y: e.clientY - rect.top
-            };
-        }
-
-        function startDrawing(e) {
-            isDrawing = true;
-            const coords = getCoords(e);
-            lastX = coords.x;
-            lastY = coords.y;
-            drawShapeOnBuffer(lastX, lastY);
-            renderBufferToMain();
-        }
-
-        function moveDrawing(e) {
-            if (!isDrawing) return;
-            e.preventDefault(); // Previene scroll en trackpads/móviles
-            const coords = getCoords(e);
-            
-            // Dibuja conectando el punto anterior con el actual de forma ultra compacta
-            drawInterpolated(lastX, lastY, coords.x, coords.y);
-            
-            lastX = coords.x;
-            lastY = coords.y;
-        }
-
-        function stopDrawing() {
-            isDrawing = false;
-        }
-
-        // Eventos Mouse y Trackpad
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', moveDrawing);
-        window.addEventListener('mouseup', stopDrawing);
-
-        // Eventos Touch / Trackpad de precisión
-        canvas.addEventListener('touchstart', startDrawing);
-        canvas.addEventListener('touchmove', moveDrawing, { passive: false });
-        canvas.addEventListener('touchend', stopDrawing);
-
-        // --- ACCIONES ---
-
-        function clearCanvas() {
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            bCtx.clearRect(0, 0, bufferCanvas.width, bufferCanvas.height);
-        }
-
-        function saveAsset() {
-            const link = document.createElement('a');
-            const dateStr = new Date().toISOString().slice(0,19).replace(/:/g, '-');
-            link.download = `blob-fusionado-${dateStr}.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        }
-    </script>
-</body>
-</html>
+                context.
