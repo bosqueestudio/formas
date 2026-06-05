@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador Orgánico Pro - Modo Oscuro</title>
+    <title>Generador Orgánico Pro - Modo Oscuro (Fixed)</title>
     <style>
         :root {
             --bg-dark: #0d0d0d;
@@ -28,7 +28,7 @@
             color: var(--text-light);
         }
 
-        /* UI/UX: PANEL LATERAL OSCURO */
+        /* UI/UX PANEL */
         .toolbar {
             width: 300px;
             background: var(--panel-bg);
@@ -93,7 +93,6 @@
             border-radius: 4px;
         }
 
-        /* BOTONES DE ACCIÓN */
         .btn-clear { color: #ff5555; border-color: #552222; }
         .btn-clear:hover { background: #331111; }
         
@@ -109,7 +108,7 @@
             gap: 5px;
         }
 
-        /* LIENZO PRINCIPAL */
+        /* LIENZO */
         .canvas-container {
             flex-grow: 1;
             height: 100%;
@@ -207,7 +206,7 @@
 
     <div class="canvas-container" id="canvas-holder">
         <canvas id="paintCanvas"></canvas>
-        <div class="status-info" id="status-text">Lienzo Oscuro Activo</div>
+        <div class="status-info" id="status-text">Lienzo Listo</div>
     </div>
 
     <script>
@@ -215,12 +214,12 @@
         const ctx = canvas.getContext('2d');
         const container = document.getElementById('canvas-holder');
 
-        // Estructura de memoria para guardar el historial del trazo (necesario para re-animar)
         let strokeHistory = []; 
         let isDrawing = false;
 
-        // Variables de físicas de suavizado (Filtro de torpeza sutil)
-        let clumsyX = 0, clumsyY = 0;
+        // Variables de inercia
+        let clumsyX = 0;
+        let clumsyY = 0;
 
         function resizeCanvas() {
             canvas.width = container.clientWidth;
@@ -233,15 +232,13 @@
         window.addEventListener('DOMContentLoaded', resizeCanvas);
 
         function resetCanvasBackground(context, width, height) {
-            context.fillStyle = "#0d0d0d"; // Fondo oscuro estricto
+            context.fillStyle = "#0d0d0d"; 
             context.fillRect(0, 0, width, height);
         }
 
-        // --- SISTEMA DE DIBUJO DE ECOS TRIPLE ---
         function drawEchos(context, x, y, shape, size, cCenter, cEcho1, cEcho2, drawStroke = true) {
             context.save();
             
-            // Configuración del stroke global
             if(drawStroke) {
                 context.strokeStyle = '#000000';
                 context.lineWidth = 1;
@@ -254,22 +251,4 @@
 
             // Eco Interior 1
             context.fillStyle = cEcho1;
-            renderSingleGeom(context, x, y, shape, size * 1.15);
-            if(drawStroke) context.stroke();
-
-            // Núcleo Centro
-            context.fillStyle = cCenter;
-            renderSingleGeom(context, x, y, shape, size);
-            if(drawStroke) context.stroke();
-
-            context.restore();
-        }
-
-        function renderSingleGeom(context, x, y, shape, size) {
-            context.beginPath();
-            if (shape === 'circle') {
-                context.arc(x, y, size / 2, 0, Math.PI * 2);
-            } else if (shape === 'square') {
-                context.rect(x - size / 2, y - size / 2, size, size);
-            } else if (shape === 'diamond') {
-                context.
+            renderSingle
