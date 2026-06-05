@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador Orgánico Pro - Modo Oscuro (Fixed)</title>
+    <title>Generador Orgánico Pro - Final Fixed</title>
     <style>
         :root {
             --bg-dark: #0d0d0d;
@@ -28,7 +28,7 @@
             color: var(--text-light);
         }
 
-        /* UI/UX PANEL */
+        /* UI PANEL LATERAL */
         .toolbar {
             width: 300px;
             background: var(--panel-bg);
@@ -39,6 +39,7 @@
             gap: 20px;
             z-index: 10;
             overflow-y: auto;
+            flex-shrink: 0;
         }
 
         h2 {
@@ -108,22 +109,16 @@
             gap: 5px;
         }
 
-        /* LIENZO */
+        /* LIENZO DE DIBUJO */
         .canvas-container {
             flex-grow: 1;
             height: 100%;
             position: relative;
             background: var(--bg-dark);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: crosshair;
         }
 
         canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
+            display: block;
             width: 100%;
             height: 100%;
         }
@@ -137,6 +132,7 @@
             pointer-events: none;
             text-transform: uppercase;
             letter-spacing: 1px;
+            z-index: 5;
         }
     </style>
 </head>
@@ -217,38 +213,246 @@
         let strokeHistory = []; 
         let isDrawing = false;
 
-        // Variables de inercia
         let clumsyX = 0;
         let clumsyY = 0;
 
-        function resizeCanvas() {
+        // Forzar inicialización limpia adaptada al DOM
+        function initCanvasSize() {
             canvas.width = container.clientWidth;
             canvas.height = container.clientHeight;
             resetCanvasBackground(ctx, canvas.width, canvas.height);
             redrawFromHistory();
         }
 
-        window.addEventListener('resize', resizeCanvas);
-        window.addEventListener('DOMContentLoaded', resizeCanvas);
+        // Eventos de redimensionamiento normales
+        window.addEventListener('resize', initCanvasSize);
+        
+        // FIX CRÍTICO: Esperar un delay seguro para que las dimensiones no se inicialicen en cero
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initCanvasSize, 100);
+        });
 
         function resetCanvasBackground(context, width, height) {
             context.fillStyle = "#0d0d0d"; 
             context.fillRect(0, 0, width, height);
         }
 
-        function drawEchos(context, x, y, shape, size, cCenter, cEcho1, cEcho2, drawStroke = true) {
+        function drawEchos(context, x, y, shape, size, cCenter, cEcho1, cEcho2) {
             context.save();
             
-            if(drawStroke) {
-                context.strokeStyle = '#000000';
-                context.lineWidth = 1;
-            }
+            // Forzar siempre stroke negro de 1px
+            context.strokeStyle = '#000000';
+            context.lineWidth = 1;
 
             // Eco Exterior 2
             context.fillStyle = cEcho2;
             renderSingleGeom(context, x, y, shape, size * 1.3);
-            if(drawStroke) context.stroke();
+            context.stroke();
 
             // Eco Interior 1
             context.fillStyle = cEcho1;
-            renderSingle
+            renderSingleGeom(context, x, y, shape, size * 1.15);
+            context.stroke();
+
+            // Núcleo Centro
+            context.fillStyle = cCenter;
+            renderSingleGeom(context, x, y, shape, size);
+            context.stroke();
+
+            context.restore();
+        }
+
+        function renderSingleGeom(context, x, y, shape, size) {
+            context.beginPath();
+            if (shape === 'circle') {
+                context.arc(x, y, size / 2, 0, Math.PI * 2);
+            } else if (shape === 'square') {
+                context.rect(x - size / 2, y - size / 2, size, size);
+            } else if (shape === 'diamond') {
+                context.moveTo(x, y - size / 2);
+                context.lineTo(x + size / 2, y);
+                context.lineTo(x, y + size / 2);
+                context.lineTo(x - size / 2, y);
+                context.closePath();
+            }
+            context.fill();
+        }
+
+        function addStrokePoint(rawX, rawY, isNewNode = false) {
+            const clumsyFactor = parseFloat(document.getElementById('brush-clumsy').value);
+            const size = parseInt(document.getElementById('pixel-size').value);
+
+            if (isNewNode) {
+                clumsyX = rawX;
+                clumsyY = rawY;
+            } else {
+                // Filtro de suavizado inercial
+                clumsyX += (rawX - clumsyX) * 0.25;
+                clumsyY += (rawY - clumsyY) * 0.25;
+
+                // Modificador orgánico aleatorio
+                const jitter = (size * clumsyFactor) * 0.05;
+                clumsyX += (Math.random() - 0.5) * jitter;
+                clumsyY += (Math.random() - 0.5) * jitter;
+            }
+
+            const pointData = {
+                x: clumsyX,
+                y: clumsyY,
+                shape: document.getElementById('pixel-shape').value,
+                size: size,
+                cCenter: document.getElementById('color-center').value,
+                cEcho1: document.getElementById('color-echo1').value,
+                cEcho2: document.getElementById('color-echo2').value
+            };
+
+            strokeHistory.push(pointData);
+            
+            // Imprimir directo en pantalla
+            drawEchos(ctx, pointData.x, pointData.y, pointData.shape, pointData.size, pointData.cCenter, pointData.cEcho1, pointData.cEcho2);
+        }
+
+        // Lógica simplificada de captura de coordenadas
+        function getCanvasCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            let clientX = e.clientX;
+            let clientY = e.clientY;
+
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            }
+
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function handleStart(e) {
+            isDrawing = true;
+            const coords = getCanvasCoords(e);
+            addStrokePoint(coords.x, coords.y, true);
+        }
+
+        function handleMove(e) {
+            if (!isDrawing) return;
+            if (e.cancelable) e.preventDefault(); 
+            const coords = getCanvasCoords(e);
+            addStrokePoint(coords.x, coords.y, false);
+        }
+
+        function handleEnd() {
+            isDrawing = false;
+        }
+
+        // Vinculación segura de oyentes
+        canvas.addEventListener('mousedown', handleStart);
+        canvas.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', handleEnd);
+
+        canvas.addEventListener('touchstart', handleStart, { passive: false });
+        canvas.addEventListener('touchmove', handleMove, { passive: false });
+        canvas.addEventListener('touchend', handleEnd);
+
+        function redrawFromHistory() {
+            resetCanvasBackground(ctx, canvas.width, canvas.height);
+            for(let pt of strokeHistory) {
+                drawEchos(ctx, pt.x, pt.y, pt.shape, pt.size, pt.cCenter, pt.cEcho1, pt.cEcho2);
+            }
+        }
+
+        // ANIMACIÓN CINEMÁTICA CON EASE
+        function playDrawingAnimation() {
+            if (strokeHistory.length === 0) return;
+            
+            let index = 0;
+            const totalPoints = strokeHistory.length;
+            const statusTxt = document.getElementById('status-text');
+            
+            function animateLoop() {
+                if (index === 0) {
+                    resetCanvasBackground(ctx, canvas.width, canvas.height);
+                }
+
+                let progress = index / totalPoints;
+                let stepSpeed = 1;
+
+                if (progress < 0.15 || progress > 0.85) {
+                    stepSpeed = Math.max(1, Math.floor(totalPoints * 0.008));
+                } else {
+                    stepSpeed = Math.max(2, Math.floor(totalPoints * 0.03));
+                }
+
+                const nextTarget = Math.min(index + stepSpeed, totalPoints);
+                
+                for (let i = index; i < nextTarget; i++) {
+                    const pt = strokeHistory[i];
+                    drawEchos(ctx, pt.x, pt.y, pt.shape, pt.size, pt.cCenter, pt.cEcho1, pt.cEcho2);
+                }
+
+                index = nextTarget;
+                statusTxt.innerText = `Animando: ${Math.floor(progress * 100)}%`;
+
+                if (index < totalPoints) {
+                    requestAnimationFrame(animateLoop);
+                } else {
+                    statusTxt.innerText = `Animación Lista`;
+                }
+            }
+            
+            requestAnimationFrame(animateLoop);
+        }
+
+        // EXPORTACIÓN EN ALTA RESOLUCIÓN
+        function saveAsset(format) {
+            if (strokeHistory.length === 0) {
+                alert("Dibuja algo antes de exportar.");
+                return;
+            }
+
+            const exportCanvas = document.createElement('canvas');
+            const eCtx = exportCanvas.getContext('2d');
+
+            let targetW = 1920;
+            let targetH = 1080;
+
+            if (format === '3:5') {
+                targetW = 1080;
+                targetH = 1350;
+            }
+
+            exportCanvas.width = targetW;
+            exportCanvas.height = targetH;
+
+            resetCanvasBackground(eCtx, targetW, targetH);
+
+            const scaleX = targetW / canvas.width;
+            const scaleY = targetH / canvas.height;
+            const masterScale = Math.min(scaleX, scaleY) * 0.85; 
+
+            const offsetX = (targetW - canvas.width * masterScale) / 2;
+            const offsetY = (targetH - canvas.height * masterScale) / 2;
+
+            for (let pt of strokeHistory) {
+                const mappedX = pt.x * masterScale + offsetX;
+                const mappedY = pt.y * masterScale + offsetY;
+                const mappedSize = pt.size * masterScale;
+
+                drawEchos(eCtx, mappedX, mappedY, pt.shape, mappedSize, pt.cCenter, pt.cEcho1, pt.cEcho2);
+            }
+
+            const link = document.createElement('a');
+            link.download = `asset-master-${format.replace(':', 'x')}-${Date.now()}.png`;
+            link.href = exportCanvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function clearCanvas() {
+            strokeHistory = [];
+            resetCanvasBackground(ctx, canvas.width, canvas.height);
+            document.getElementById('status-text').innerText = "Lienzo Limpio";
+        }
+    </script>
+</body>
+</html>
