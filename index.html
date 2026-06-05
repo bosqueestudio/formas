@@ -3,12 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formas Irregulares Orgánicas</title>
+    <title>Generador de Formas Orgánicas - Canvas Edition</title>
     <style>
         :root {
-            --bg-color: #ffffff;
-            --shape-color: #f4f3b6; /* El tono amarillo/verdoso de tu ejemplo */
+            --bg-color: #f5f5f5;
+            --panel-bg: #ffffff;
             --text-color: #000000;
+            --accent-color: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
         }
 
         body {
@@ -17,163 +23,313 @@
             width: 100vw;
             height: 100vh;
             background-color: var(--bg-color);
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            overflow: hidden;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            box-sizing: border-box;
-            border: 20px solid black; /* Marco exterior estilo poster */
+            overflow: hidden;
         }
 
-        /* Contenedor del Poster */
-        .poster-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
+        /* BARRA DE HERRAMIENTAS (UI/UX Lateral) */
+        .toolbar {
+            width: 280px;
+            background: var(--panel-bg);
+            border-right: 2px solid #000;
+            padding: 30px 20px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            padding: 40px;
-            box-sizing: border-box;
-            z-index: 2;
-            pointer-events: none; /* Permite clickear el fondo para cambiar la forma */
+            gap: 25px;
+            z-index: 10;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.02);
         }
 
-        /* Tipografías grandes del ejemplo */
-        h1 {
-            font-size: clamp(3rem, 8vw, 6rem);
-            font-weight: 400;
-            margin: 0;
-            color: var(--text-color);
-            letter-spacing: -2px;
-            line-height: 0.9;
+        h2 {
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0 0 10px 0;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
         }
 
-        .bottom-text {
-            font-size: clamp(3rem, 8vw, 6rem);
-            font-weight: 400;
-            margin: 0;
-            color: var(--text-color);
-            letter-spacing: -2px;
-            line-height: 0.9;
-            text-align: left;
+        .tool-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
-        /* Contenedor de la forma interactiva */
-        .shape-wrapper {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80vw;
-            height: 70vh;
-            max-width: 500px;
-            max-height: 700px;
-            z-index: 1;
+        label {
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #555;
+        }
+
+        select, input[type="color"], button {
+            width: 100%;
+            padding: 12px;
+            font-size: 0.95rem;
+            border: 2px solid #000;
+            background: #fff;
+            cursor: pointer;
+            border-radius: 0; /* Estética brutalista / geométrica */
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        select:hover, button:hover {
+            background: #f0f0f0;
+        }
+
+        /* Input de color personalizado */
+        input[type="color"] {
+            height: 50px;
+            padding: 2px;
+        }
+
+        /* Botón de Guardar / Limpiar */
+        button.btn-save {
+            background: #000;
+            color: #fff;
+            margin-top: auto; /* Lo empuja al fondo del panel */
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button.btn-save:hover {
+            background: #333;
+            color: #fff;
+        }
+
+        button.btn-clear {
+            background: #fff;
+            color: #ff4444;
+            border-color: #ff4444;
+        }
+        button.btn-clear:hover {
+            background: #fff5f5;
+        }
+
+        /* ÁREA DEL LIENZO (CANVAS) */
+        .canvas-container {
+            flex-grow: 1;
+            height: 100%;
+            position: relative;
+            background: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
-            pointer-events: auto;
-            cursor: pointer;
+            cursor: crosshair;
         }
 
-        /* Animación combinada: Flotar (arriba/abajo) + Wiggle (rotación sutil) */
-        .animated-shape {
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            filter: drop-shadow(0px 0px 1px rgba(0,0,0,0.5)); /* Simula el borde fino */
-            animation: floatWiggle 6s ease-in-out infinite alternate;
-            transition: d 0.5s ease-in-out; /* Transición suave al cambiar de forma */
         }
 
-        .animated-shape path {
-            fill: var(--shape-color);
-            stroke: #000;
-            stroke-width: 1.5px;
-        }
-
-        @keyframes floatWiggle {
-            0% {
-                transform: translateY(-15px) rotate(-3deg);
-            }
-            50% {
-                transform: translateY(10px) rotate(2deg);
-            }
-            100% {
-                transform: translateY(-15px) rotate(-2deg);
-            }
-        }
-
-        /* Instrucción sutil para el usuario */
-        .instruction {
+        /* Feedback visual en las esquinas */
+        .status-info {
             position: absolute;
-            bottom: 25px;
-            right: 40px;
+            bottom: 20px;
+            right: 20px;
             font-size: 0.8rem;
+            color: #888;
+            pointer-events: none;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: rgba(0,0,0,0.4);
         }
     </style>
 </head>
 <body>
 
-    <div class="poster-container">
-        <h1>Permanecer fuera</h1>
-        <div class="bottom-text">de todo este caos.</div>
+    <div class="toolbar">
+        <h2>Creador de Blobs</h2>
+        
+        <div class="tool-group">
+            <label for="pixel-shape">Forma del Píxel</label>
+            <select id="pixel-shape">
+                <option value="circle">Círculo</option>
+                <option value="square">Cuadrado</option>
+                <option value="diamond">Diamante</option>
+            </select>
+        </div>
+
+        <div class="tool-group">
+            <label for="fill-color">Color de Relleno</label>
+            <input type="color" id="fill-color" value="#f4f3b6">
+        </div>
+
+        <div class="tool-group">
+            <label for="pixel-size">Grosor de Trazo (Tamaño)</label>
+            <select id="pixel-size">
+                <option value="30">Pequeño</option>
+                <option value="60" selected>Mediano</option>
+                <option value="100">Grande</option>
+            </select>
+        </div>
+
+        <button class="btn-clear" onclick="clearCanvas()">Limpiar Lienzo</button>
+        <button class="btn-save" onclick="saveAsset()">Guardar Asset (.PNG)</button>
     </div>
 
-    <div class="shape-wrapper" onclick="generateNewShape()">
-        <svg class="animated-shape" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
-            <path id="organic-path" d="" />
-        </svg>
+    <div class="canvas-container" id="canvas-holder">
+        <canvas id="paintCanvas"></canvas>
+        <div class="status-info">Dibuja con tu trackpad o mouse</div>
     </div>
-
-    <div class="instruction">Haz click en el centro para cambiar la forma</div>
 
     <script>
-        // Función para generar un número aleatorio entre un rango
-        const randomRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        const canvas = document.getElementById('paintCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-holder');
 
-        function generateNewShape() {
-            const path = document.getElementById('organic-path');
-            
-            // Definimos los puntos clave para armar la "columna" de elipses fusionadas (como tu ejemplo)
-            // Estructura fija de ancho/alto base pero con multiplicadores aleatorios (fuzziness)
-            
-            const widthBase = 400;
-            const heightBase = 600;
-            
-            // Generamos curvas de Bezier aleatorias simulando los 4 "lóbulos" del diseño original
-            const p1 = randomRange(280, 360); // Ancho lóbulo 1
-            const p2 = randomRange(260, 350); // Ancho lóbulo 2
-            const p3 = randomRange(270, 360); // Ancho lóbulo 3
-            const p4 = randomRange(250, 340); // Ancho lóbulo 4
-            
-            const indent1 = randomRange(60, 110);  // Qué tan adentro entra la cintura 1
-            const indent2 = randomRange(50, 100);  // Qué tan adentro entra la cintura 2
-            const indent3 = randomRange(60, 110);  // Qué tan adentro entra la cintura 3
+        // Inputs del usuario
+        const shapeSelect = document.getElementById('pixel-shape');
+        const colorInput = document.getElementById('fill-color');
+        const sizeSelect = document.getElementById('pixel-size');
 
-            // Construcción del Path SVG (Mitad derecha e izquierda espejeadas con variaciones orgánicas)
-            const dStr = `
-                M 200, 40 
-                C ${200 + p1/2},40 ${400 - indent1},100 200,160
-                C ${400 - indent1},190 ${200 + p2/2},220 200,300
-                C ${200 + p3/2},340 ${400 - indent2},380 200,440
-                C ${400 - indent3},480 ${200 + p4/2},520 200,560
-                C ${200 - p4/2},520 ${indent3},480 200,440
-                C ${indent2},380 ${200 - p3/2},340 200,300
-                C ${200 - p2/2},220 ${indent1},190 200,160
-                C ${indent1},100 ${200 - p1/2},40 200,40 
-                Z
-            `;
-            
-            path.setAttribute('d', dStr);
+        let isDrawing = false;
+
+        // Ajustar el tamaño del canvas al contenedor real del navegador (Full Res)
+        function resizeCanvas() {
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            // Volver a pintar fondo blanco para que al guardar no sea transparente
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
-        // Generar la primera forma automáticamente al cargar la pantalla
-        window.onload = generateNewShape;
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('DOMContentLoaded', resizeCanvas);
+
+        // --- FUNCIONES DE DIBUJO ---
+
+        // Función auxiliar para dibujar un diamante
+        function drawDiamond(x, y, size) {
+            ctx.beginPath();
+            ctx.moveTo(x, y - size / 2); // Arriba
+            ctx.lineTo(x + size / 2, y); // Derecha
+            ctx.lineTo(x, y + size / 2); // Abajo
+            ctx.lineTo(x - size / 2, y); // Izquierda
+            ctx.closePath();
+        }
+
+        // Función core que dibuja cada fragmento de la forma irregular
+        function drawPixelShape(x, y, isCap = false) {
+            const shape = shapeSelect.value;
+            const size = parseInt(sizeSelect.value);
+            
+            ctx.fillStyle = colorInput.value;
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 1; // 1px de stroke rígido solicitado
+
+            // Si es punto inicial o final (Cap), podemos alterar sutilmente el tamaño o comportamiento si se desea.
+            const currentSize = isCap ? size * 1.1 : size; 
+
+            if (shape === 'circle') {
+                ctx.beginPath();
+                ctx.arc(x, y, currentSize / 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            } 
+            else if (shape === 'square') {
+                ctx.beginPath();
+                ctx.rect(x - currentSize / 2, y - currentSize / 2, currentSize, currentSize);
+                ctx.fill();
+                ctx.stroke();
+            } 
+            else if (shape === 'diamond') {
+                drawDiamond(x, y, currentSize);
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            // Si es punto inicial o final, dibujamos un núcleo o indicador visual para destacarlo
+            if (isCap) {
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = '#000000';
+                ctx.fill();
+            }
+        }
+
+        // --- DETECCIÓN DE EVENTOS (MOUSE / TRACKPAD) ---
+
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Punto Inicial (Booleano true indicando que es "Cap")
+            drawPixelShape(x, y, true);
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            drawPixelShape(x, y, false);
+        });
+
+        canvas.addEventListener('mouseup', (e) => {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Punto Final
+            drawPixelShape(x, y, true);
+            isDrawing = false;
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            isDrawing = false;
+        });
+
+        // Soporte básico para pantallas táctiles / trackpads avanzados
+        canvas.addEventListener('touchstart', (e) => {
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            drawPixelShape(x, y, true);
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            drawPixelShape(x, y, false);
+        });
+
+        canvas.addEventListener('touchend', () => {
+            isDrawing = false;
+        });
+
+
+        // --- ACCIONES DE LA APP ---
+
+        function clearCanvas() {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function saveAsset() {
+            // Creamos un link virtual de descarga
+            const link = document.createElement('a');
+            // Le ponemos fecha/hora actual al nombre para que sea un asset único local
+            const dateStr = new Date().toISOString().slice(0,19).replace(/:/g, '-');
+            link.download = `asset-forma-organica-${dateStr}.png`;
+            
+            // Convertimos el contenido del canvas a imagen PNG de alta calidad
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
     </script>
 </body>
 </html>
