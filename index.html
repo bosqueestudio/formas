@@ -1,15 +1,14 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Formas Orgánicas - Canvas Edition</title>
+    <title>Generador de Formas Orgánicas - Merge Canvas</title>
     <style>
         :root {
             --bg-color: #f5f5f5;
             --panel-bg: #ffffff;
             --text-color: #000000;
-            --accent-color: #333333;
         }
 
         * {
@@ -27,7 +26,7 @@
             overflow: hidden;
         }
 
-        /* BARRA DE HERRAMIENTAS (UI/UX Lateral) */
+        /* BARRA DE HERRAMIENTAS (UI/UX) */
         .toolbar {
             width: 280px;
             background: var(--panel-bg);
@@ -69,7 +68,7 @@
             border: 2px solid #000;
             background: #fff;
             cursor: pointer;
-            border-radius: 0; /* Estética brutalista / geométrica */
+            border-radius: 0;
             outline: none;
             transition: all 0.2s ease;
         }
@@ -78,17 +77,15 @@
             background: #f0f0f0;
         }
 
-        /* Input de color personalizado */
         input[type="color"] {
             height: 50px;
             padding: 2px;
         }
 
-        /* Botón de Guardar / Limpiar */
         button.btn-save {
             background: #000;
             color: #fff;
-            margin-top: auto; /* Lo empuja al fondo del panel */
+            margin-top: auto;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -96,7 +93,6 @@
 
         button.btn-save:hover {
             background: #333;
-            color: #fff;
         }
 
         button.btn-clear {
@@ -108,7 +104,7 @@
             background: #fff5f5;
         }
 
-        /* ÁREA DEL LIENZO (CANVAS) */
+        /* ÁREA DEL LIENZO */
         .canvas-container {
             flex-grow: 1;
             height: 100%;
@@ -128,7 +124,6 @@
             height: 100%;
         }
 
-        /* Feedback visual en las esquinas */
         .status-info {
             position: absolute;
             bottom: 20px;
@@ -160,11 +155,11 @@
         </div>
 
         <div class="tool-group">
-            <label for="pixel-size">Grosor de Trazo (Tamaño)</label>
+            <label for="pixel-size">Tamaño de la Forma</label>
             <select id="pixel-size">
-                <option value="30">Pequeño</option>
-                <option value="60" selected>Mediano</option>
-                <option value="100">Grande</option>
+                <option value="40">Pequeño</option>
+                <option value="80" selected>Mediano</option>
+                <option value="130">Grande</option>
             </select>
         </div>
 
@@ -174,7 +169,7 @@
 
     <div class="canvas-container" id="canvas-holder">
         <canvas id="paintCanvas"></canvas>
-        <div class="status-info">Dibuja con tu trackpad o mouse</div>
+        <div class="status-info">Dibuja lento para formas fluidas</div>
     </div>
 
     <script>
@@ -182,151 +177,167 @@
         const ctx = canvas.getContext('2d');
         const container = document.getElementById('canvas-holder');
 
-        // Inputs del usuario
+        // Canvas oculto (Buffer) para lograr el efecto de fusión (Merge)
+        const bufferCanvas = document.createElement('canvas');
+        const bCtx = bufferCanvas.getContext('2d');
+
         const shapeSelect = document.getElementById('pixel-shape');
         const colorInput = document.getElementById('fill-color');
         const sizeSelect = document.getElementById('pixel-size');
 
         let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
 
-        // Ajustar el tamaño del canvas al contenedor real del navegador (Full Res)
         function resizeCanvas() {
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-            // Volver a pintar fondo blanco para que al guardar no sea transparente
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            const w = container.clientWidth;
+            const h = container.clientHeight;
+            
+            canvas.width = w;
+            canvas.height = h;
+            bufferCanvas.width = w;
+            bufferCanvas.height = h;
+            
+            clearCanvas();
         }
 
         window.addEventListener('resize', resizeCanvas);
         window.addEventListener('DOMContentLoaded', resizeCanvas);
 
-        // --- FUNCIONES DE DIBUJO ---
-
-        // Función auxiliar para dibujar un diamante
-        function drawDiamond(x, y, size) {
-            ctx.beginPath();
-            ctx.moveTo(x, y - size / 2); // Arriba
-            ctx.lineTo(x + size / 2, y); // Derecha
-            ctx.lineTo(x, y + size / 2); // Abajo
-            ctx.lineTo(x - size / 2, y); // Izquierda
-            ctx.closePath();
+        function drawDiamondPath(context, x, y, size) {
+            context.beginPath();
+            context.moveTo(x, y - size / 2);
+            context.lineTo(x + size / 2, y);
+            context.lineTo(x, y + size / 2);
+            context.lineTo(x - size / 2, y);
+            context.closePath();
         }
 
-        // Función core que dibuja cada fragmento de la forma irregular
-        function drawPixelShape(x, y, isCap = false) {
+        // Dibuja la forma individual en el buffer oculto (solo el relleno)
+        function drawShapeOnBuffer(x, y) {
             const shape = shapeSelect.value;
             const size = parseInt(sizeSelect.value);
             
-            ctx.fillStyle = colorInput.value;
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 1; // 1px de stroke rígido solicitado
-
-            // Si es punto inicial o final (Cap), podemos alterar sutilmente el tamaño o comportamiento si se desea.
-            const currentSize = isCap ? size * 1.1 : size; 
+            bCtx.fillStyle = colorInput.value;
 
             if (shape === 'circle') {
-                ctx.beginPath();
-                ctx.arc(x, y, currentSize / 2, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-            } 
-            else if (shape === 'square') {
-                ctx.beginPath();
-                ctx.rect(x - currentSize / 2, y - currentSize / 2, currentSize, currentSize);
-                ctx.fill();
-                ctx.stroke();
-            } 
-            else if (shape === 'diamond') {
-                drawDiamond(x, y, currentSize);
-                ctx.fill();
-                ctx.stroke();
-            }
-
-            // Si es punto inicial o final, dibujamos un núcleo o indicador visual para destacarlo
-            if (isCap) {
-                ctx.beginPath();
-                ctx.arc(x, y, 4, 0, Math.PI * 2);
-                ctx.fillStyle = '#000000';
-                ctx.fill();
+                bCtx.beginPath();
+                bCtx.arc(x, y, size / 2, 0, Math.PI * 2);
+                bCtx.fill();
+            } else if (shape === 'square') {
+                bCtx.beginPath();
+                bCtx.rect(x - size / 2, y - size / 2, size, size);
+                bCtx.fill();
+            } else if (shape === 'diamond') {
+                drawDiamondPath(bCtx, x, y, size);
+                bCtx.fill();
             }
         }
 
-        // --- DETECCIÓN DE EVENTOS (MOUSE / TRACKPAD) ---
+        // Renderiza el buffer en la pantalla aplicando el contorno negro (Merge Effect)
+        function renderBufferToMain() {
+            // Limpiamos el lienzo visible con fondo blanco
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        canvas.addEventListener('mousedown', (e) => {
+            // Filtro avanzado por código: Para pintar el stroke exterior de 1px sin interceptar el interior,
+            // dibujamos el buffer original encima de sí mismo desplazado sutilmente, o usamos la técnica de stroke vectorial.
+            // Para mantener performance óptimo y bordes limpios en tiempo real:
+            ctx.drawImage(bufferCanvas, 0, 0);
+
+            // Generamos el contorno negro exterior de 1px usando composición de trazo
+            ctx.shadowColor = '#000000';
+            ctx.shadowBlur = 1;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            
+            // Redibujamos la silueta para marcar el borde perimetral
+            ctx.drawImage(bufferCanvas, 0, 0);
+            
+            // Reseteamos sombras para no afectar otros renders
+            ctx.shadowBlur = 0;
+        }
+
+        // Interpolación lineal para rellenar los huecos vacíos del trackpad (Evita el scattering)
+        function drawInterpolated(startX, startY, endX, endY) {
+            const distance = Math.hypot(endX - startX, endY - startY);
+            // Definimos que estampe una figura mínimo cada 2 píxeles de movimiento para pegarlas por completo
+            const steps = Math.max(Math.floor(distance / 2), 1); 
+
+            for (let i = 0; i < steps; i++) {
+                const t = i / steps;
+                const x = startX + (endX - startX) * t;
+                const y = startY + (endY - startY) * t;
+                drawShapeOnBuffer(x, y);
+            }
+            
+            renderBufferToMain();
+        }
+
+        // --- MANEJADORES DE EVENTOS ---
+
+        function getCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            if (e.touches && e.touches.length > 0) {
+                return {
+                    x: e.touches[0].clientX - rect.left,
+                    y: e.touches[0].clientY - rect.top
+                };
+            }
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+
+        function startDrawing(e) {
             isDrawing = true;
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            // Punto Inicial (Booleano true indicando que es "Cap")
-            drawPixelShape(x, y, true);
-        });
+            const coords = getCoords(e);
+            lastX = coords.x;
+            lastY = coords.y;
+            drawShapeOnBuffer(lastX, lastY);
+            renderBufferToMain();
+        }
 
-        canvas.addEventListener('mousemove', (e) => {
+        function moveDrawing(e) {
             if (!isDrawing) return;
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            e.preventDefault(); // Previene scroll en trackpads/móviles
+            const coords = getCoords(e);
             
-            drawPixelShape(x, y, false);
-        });
-
-        canvas.addEventListener('mouseup', (e) => {
-            if (!isDrawing) return;
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            // Dibuja conectando el punto anterior con el actual de forma ultra compacta
+            drawInterpolated(lastX, lastY, coords.x, coords.y);
             
-            // Punto Final
-            drawPixelShape(x, y, true);
+            lastX = coords.x;
+            lastY = coords.y;
+        }
+
+        function stopDrawing() {
             isDrawing = false;
-        });
+        }
 
-        canvas.addEventListener('mouseleave', () => {
-            isDrawing = false;
-        });
+        // Eventos Mouse y Trackpad
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', moveDrawing);
+        window.addEventListener('mouseup', stopDrawing);
 
-        // Soporte básico para pantallas táctiles / trackpads avanzados
-        canvas.addEventListener('touchstart', (e) => {
-            isDrawing = true;
-            const rect = canvas.getBoundingClientRect();
-            const touch = e.touches[0];
-            const x = touch.clientX - rect.left;
-            const y = touch.clientY - rect.top;
-            drawPixelShape(x, y, true);
-        });
+        // Eventos Touch / Trackpad de precisión
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', moveDrawing, { passive: false });
+        canvas.addEventListener('touchend', stopDrawing);
 
-        canvas.addEventListener('touchmove', (e) => {
-            if (!isDrawing) return;
-            const rect = canvas.getBoundingClientRect();
-            const touch = e.touches[0];
-            const x = touch.clientX - rect.left;
-            const y = touch.clientY - rect.top;
-            drawPixelShape(x, y, false);
-        });
-
-        canvas.addEventListener('touchend', () => {
-            isDrawing = false;
-        });
-
-
-        // --- ACCIONES DE LA APP ---
+        // --- ACCIONES ---
 
         function clearCanvas() {
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            bCtx.clearRect(0, 0, bufferCanvas.width, bufferCanvas.height);
         }
 
         function saveAsset() {
-            // Creamos un link virtual de descarga
             const link = document.createElement('a');
-            // Le ponemos fecha/hora actual al nombre para que sea un asset único local
             const dateStr = new Date().toISOString().slice(0,19).replace(/:/g, '-');
-            link.download = `asset-forma-organica-${dateStr}.png`;
-            
-            // Convertimos el contenido del canvas a imagen PNG de alta calidad
+            link.download = `blob-fusionado-${dateStr}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
         }
