@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formas Irregulares Orgánicas</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --shape-color: #f4f3b6; /* El tono amarillo/verdoso de tu ejemplo */
+            --text-color: #000000;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-color);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+            border: 20px solid black; /* Marco exterior estilo poster */
+        }
+
+        /* Contenedor del Poster */
+        .poster-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px;
+            box-sizing: border-box;
+            z-index: 2;
+            pointer-events: none; /* Permite clickear el fondo para cambiar la forma */
+        }
+
+        /* Tipografías grandes del ejemplo */
+        h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 400;
+            margin: 0;
+            color: var(--text-color);
+            letter-spacing: -2px;
+            line-height: 0.9;
+        }
+
+        .bottom-text {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 400;
+            margin: 0;
+            color: var(--text-color);
+            letter-spacing: -2px;
+            line-height: 0.9;
+            text-align: left;
+        }
+
+        /* Contenedor de la forma interactiva */
+        .shape-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw;
+            height: 70vh;
+            max-width: 500px;
+            max-height: 700px;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        /* Animación combinada: Flotar (arriba/abajo) + Wiggle (rotación sutil) */
+        .animated-shape {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0px 0px 1px rgba(0,0,0,0.5)); /* Simula el borde fino */
+            animation: floatWiggle 6s ease-in-out infinite alternate;
+            transition: d 0.5s ease-in-out; /* Transición suave al cambiar de forma */
+        }
+
+        .animated-shape path {
+            fill: var(--shape-color);
+            stroke: #000;
+            stroke-width: 1.5px;
+        }
+
+        @keyframes floatWiggle {
+            0% {
+                transform: translateY(-15px) rotate(-3deg);
+            }
+            50% {
+                transform: translateY(10px) rotate(2deg);
+            }
+            100% {
+                transform: translateY(-15px) rotate(-2deg);
+            }
+        }
+
+        /* Instrucción sutil para el usuario */
+        .instruction {
+            position: absolute;
+            bottom: 25px;
+            right: 40px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(0,0,0,0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="poster-container">
+        <h1>Permanecer fuera</h1>
+        <div class="bottom-text">de todo este caos.</div>
+    </div>
+
+    <div class="shape-wrapper" onclick="generateNewShape()">
+        <svg class="animated-shape" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
+            <path id="organic-path" d="" />
+        </svg>
+    </div>
+
+    <div class="instruction">Haz click en el centro para cambiar la forma</div>
+
+    <script>
+        // Función para generar un número aleatorio entre un rango
+        const randomRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+        function generateNewShape() {
+            const path = document.getElementById('organic-path');
+            
+            // Definimos los puntos clave para armar la "columna" de elipses fusionadas (como tu ejemplo)
+            // Estructura fija de ancho/alto base pero con multiplicadores aleatorios (fuzziness)
+            
+            const widthBase = 400;
+            const heightBase = 600;
+            
+            // Generamos curvas de Bezier aleatorias simulando los 4 "lóbulos" del diseño original
+            const p1 = randomRange(280, 360); // Ancho lóbulo 1
+            const p2 = randomRange(260, 350); // Ancho lóbulo 2
+            const p3 = randomRange(270, 360); // Ancho lóbulo 3
+            const p4 = randomRange(250, 340); // Ancho lóbulo 4
+            
+            const indent1 = randomRange(60, 110);  // Qué tan adentro entra la cintura 1
+            const indent2 = randomRange(50, 100);  // Qué tan adentro entra la cintura 2
+            const indent3 = randomRange(60, 110);  // Qué tan adentro entra la cintura 3
+
+            // Construcción del Path SVG (Mitad derecha e izquierda espejeadas con variaciones orgánicas)
+            const dStr = `
+                M 200, 40 
+                C ${200 + p1/2},40 ${400 - indent1},100 200,160
+                C ${400 - indent1},190 ${200 + p2/2},220 200,300
+                C ${200 + p3/2},340 ${400 - indent2},380 200,440
+                C ${400 - indent3},480 ${200 + p4/2},520 200,560
+                C ${200 - p4/2},520 ${indent3},480 200,440
+                C ${indent2},380 ${200 - p3/2},340 200,300
+                C ${200 - p2/2},220 ${indent1},190 200,160
+                C ${indent1},100 ${200 - p1/2},40 200,40 
+                Z
+            `;
+            
+            path.setAttribute('d', dStr);
+        }
+
+        // Generar la primera forma automáticamente al cargar la pantalla
+        window.onload = generateNewShape;
+    </script>
+</body>
+</html>
