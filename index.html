@@ -1,9 +1,9 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Organic Blob Generator OS - Pro Workflow</title>
+    <title>Organic Blob & Typography Generator OS</title>
     <style>
         :root {
             --bg-dark: #050505; 
@@ -38,7 +38,7 @@
             padding: 25px 20px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 15px;
             z-index: 10;
             overflow-y: auto;
             flex-shrink: 0;
@@ -62,7 +62,7 @@
         }
 
         .disabled-state {
-            opacity: 0.2;
+            opacity: 0.15;
             pointer-events: none;
             transition: opacity 0.4s ease;
         }
@@ -110,7 +110,7 @@
             font-size: 0.85rem;
         }
 
-        select, input[type="color"], button, input[type="range"] {
+        select, input[type="color"], button, input[type="range"], input[type="text"] {
             width: 100%;
             padding: 10px;
             font-size: 0.85rem;
@@ -120,6 +120,14 @@
             cursor: pointer;
             outline: none;
             transition: all 0.2s ease;
+        }
+
+        input[type="text"] {
+            cursor: text;
+            border-radius: 0;
+        }
+        input[type="text"]:focus {
+            border-color: var(--accent-blue);
         }
 
         select:hover, button:hover {
@@ -217,7 +225,16 @@
         .btn-anim { background: #007bff; color: white; font-weight: bold; text-transform: uppercase;}
         .btn-anim:hover { background: #0056b3; }
 
-        /* WORKSPACE CONTAINER WITH DOT GRID */
+        .btn-interpret {
+            background: #28a745;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-color: #1e7e34;
+        }
+        .btn-interpret:hover { background: #218838; }
+
+        /* WORKSPACE WITH MUTED DOT GRID */
         .workspace-container {
             flex-grow: 1;
             height: 100%;
@@ -225,12 +242,10 @@
             background-image: radial-gradient(#161616 1.2px, transparent 1.2px);
             background-size: 24px 24px;
             display: flex;
-            flex-direction: column; /* Cambiado a columna para ubicar el botón abajo */
             justify-content: center;
             align-items: center;
             position: relative;
-            padding: 40px;
-            gap: 20px;
+            padding: 60px;
         }
 
         /* FLOATING DARK ARTBOARD */
@@ -250,34 +265,40 @@
             cursor: crosshair;
         }
 
-        /* BARRA DE UTILIDADES FLOTANTE DEBAJO DEL CANVAS */
-        .canvas-utilities {
-            display: none; /* Se activa al seleccionar formato */
+        /* UI NUEVA: BOTÓN CLEAR CANVAS INFERIOR FLOTANTE CON ICONO REFRESH */
+        .artboard-bottom-bar {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 15;
         }
 
-        .artboard-clear-btn {
+        .artboard-clear-btn-modern {
             background: rgba(15, 15, 15, 0.9);
             border: 1px solid #262626;
-            color: #aaa;
+            color: #ffffff;
+            padding: 10px 20px;
             font-size: 0.75rem;
             font-weight: bold;
             letter-spacing: 1px;
-            padding: 10px 20px;
             display: flex;
             align-items: center;
             gap: 8px;
             cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             transition: all 0.2s ease;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
-        .artboard-clear-btn:hover {
-            background: #ff4444;
-            color: #fff;
-            border-color: #ff4444;
+
+        .artboard-clear-btn-modern:hover {
+            background: #ffffff;
+            color: #000000;
+            border-color: #ffffff;
         }
-        .artboard-clear-btn span {
-            font-size: 0.95rem;
+
+        .artboard-clear-btn-modern span {
+            font-size: 1rem;
+            line-height: 1;
         }
 
         .status-info {
@@ -300,8 +321,6 @@
             letter-spacing: 2px;
             pointer-events: none;
             text-align: center;
-            top: 50%;
-            transform: translateY(-50%);
         }
     </style>
 </head>
@@ -321,7 +340,7 @@
             </div>
         </div>
 
-        <div id="dynamic-tools" class="disabled-state" style="display: flex; flex-direction: column; gap: 16px; height: 100%;">
+        <div id="dynamic-tools" class="disabled-state" style="display: flex; flex-direction: column; gap: 14px; height: 100%;">
             
             <div class="tool-group">
                 <label>2. Pixel Shape</label>
@@ -329,7 +348,7 @@
                     <input type="radio" name="pixel-shape" id="shape-circle" value="circle" checked class="radio-btn">
                     <label for="shape-circle" class="radio-label">Circle</label>
                     
-                    <input type="radio" name="pixel-shape" id="shape-square" value="square" class="radio-btn">
+                    <input type="radio" name="shape-square" id="shape-square" value="square" class="radio-btn">
                     <label for="shape-square" class="radio-label">Square</label>
                     
                     <input type="radio" name="pixel-shape" id="shape-diamond" value="diamond" class="radio-btn">
@@ -403,11 +422,15 @@
                 <input type="range" id="brush-clumsy-slider" min="1" max="3" step="1" value="2" oninput="updateClumsyLabel(this.value)">
             </div>
 
-            <hr style="border:0; border-top: 1px solid var(--border-color); width:100%; margin: 3px 0;">
+            <div class="tool-group" style="background: #171717; padding: 10px; border: 1px solid #262626; margin-top: 5px;">
+                <label style="color: #28a745;">4. Text Interpret Engine</label>
+                <input type="text" id="interpret-text-input" placeholder="Type a word..." value="CHAOS">
+                <button class="btn-interpret" onclick="interpretTextToStrokes()">Generate Vector</button>
+            </div>
 
-            <button class="btn-clear" onclick="clearCanvas()">Clear Canvas</button>
+            <hr style="border:0; border-top: 1px solid var(--border-color); width:100%; margin: 2px 0;">
+
             <button class="btn-anim" onclick="playDrawingAnimation()">▶ Re-Animate Trazo</button>
-            
             <button class="btn-action" onclick="saveAsset()">Save Asset (.PNG)</button>
         </div>
     </div>
@@ -419,8 +442,8 @@
             <canvas id="paintCanvas"></canvas>
         </div>
 
-        <div class="canvas-utilities" id="canvas-utils">
-            <button class="artboard-clear-btn" onclick="clearCanvas()">
+        <div class="artboard-bottom-bar" id="artboard-actions-panel" style="display:none;">
+            <button class="artboard-clear-btn-modern" onclick="clearCanvas()">
                 <span>↻</span> CLEAR CANVAS
             </button>
         </div>
@@ -433,7 +456,7 @@
         const ctx = canvas.getContext('2d');
         const container = document.getElementById('canvas-holder');
         const wrapper = document.getElementById('canvas-wrapper');
-        const utils = document.getElementById('canvas-utils');
+        const clearPanel = document.getElementById('artboard-actions-panel');
 
         let strokeHistory = []; 
         let isDrawing = false;
@@ -446,7 +469,7 @@
             canvasUnlocked = true;
             document.getElementById('dynamic-tools').classList.remove('disabled-state');
             wrapper.style.display = 'block';
-            utils.style.display = 'block'; // Mostrar botón de utilidades inferior
+            clearPanel.style.display = 'block'; // Mostrar botón de borrado inferior
             document.getElementById('welcome-text').style.display = 'none';
             document.getElementById('status-text').innerText = "Workspace Grid Engaged";
             updateCanvasFormat();
@@ -456,9 +479,8 @@
             if (!canvasUnlocked) return;
 
             const activeRatio = document.querySelector('input[name="aspect-ratio"]:checked').value;
-            // Ajuste del alto máximo disponible considerando el espacio para el botón inferior
             const maxW = container.clientWidth - 120;
-            const maxH = container.clientHeight - 180;
+            const maxH = container.clientHeight - 120;
 
             let targetW, targetH;
 
@@ -665,26 +687,93 @@
             requestAnimationFrame(animateLoop);
         }
 
-        // EXPORTACIÓN EXCLUSIVA CON TRANSPARENCIA (SIN BACKGROUND)
-        function saveAsset() {
-            if (strokeHistory.length === 0) { alert("Canvas is empty!"); return; }
-            const activeRatio = document.querySelector('input[name="aspect-ratio"]:checked').value;
+        // HERRAMIENTA NUEVA: INTERPRETADOR DE TEXTO VECTORIAL PROCEDURAL
+        function interpretTextToStrokes() {
+            if (!canvasUnlocked) return;
             
-            // Pasamos un Canvas virtual en memoria limpio (transparente) para recolectar el trazo
-            const exportCanvas = document.createElement('canvas');
-            const eCtx = exportCanvas.getContext('2d');
-            exportCanvas.width = canvas.width;
-            exportCanvas.height = canvas.height;
+            const textToDraw = document.getElementById('interpret-text-input').value.toUpperCase();
+            if (!textToDraw) return;
 
-            // Al no pintar un fondo con ctx.fillRect(), queda 100% transparente
-            for(let pt of strokeHistory) {
-                drawEchos(eCtx, pt.x, pt.y, pt.shape, pt.size, pt.cCenter, pt.cEcho1, pt.cEcho2, pt.stroke, pt.blur);
+            clearCanvas();
+            document.getElementById('status-text').innerText = "Interpreting text...";
+
+            // Creamos un canvas virtual temporal para renderizar el texto y extraer coordenadas de pixeles
+            const tCanvas = document.createElement('canvas');
+            const tCtx = tCanvas.getContext('2d');
+            tCanvas.width = canvas.width;
+            tCanvas.height = canvas.height;
+
+            tCtx.fillStyle = "#000000";
+            tCtx.fillRect(0, 0, tCanvas.width, tCanvas.height);
+
+            // Configuramos una tipografía robusta para generar una masa vectorial legible
+            const fontSize = Math.floor(canvas.width * 0.18);
+            tCtx.font = `900 ${fontSize}px Arial, Impact, sans-serif`;
+            tCtx.fillStyle = "#ffffff";
+            tCtx.textAlign = "center";
+            tCtx.textBaseline = "middle";
+            
+            // Dibujamos el texto plano en el canvas temporal
+            tCtx.fillText(textToDraw, tCanvas.width / 2, tCanvas.height / 2);
+
+            // Analizamos los pixeles impresos de la tipografía
+            const imgData = tCtx.getImageData(0, 0, tCanvas.width, tCanvas.height).data;
+            const pointsCollected = [];
+
+            // Muestreamos el mapa de bits con un paso estratégico (step) para inyectar los ecos de forma controlada
+            const sampleStep = 18; 
+
+            for (let y = 0; y < tCanvas.height; y += sampleStep) {
+                for (let x = 0; x < tCanvas.width; x += sampleStep) {
+                    const index = (y * tCanvas.width + x) * 4;
+                    const r = imgData[index];
+                    // Si el pixel es blanco, significa que es parte del cuerpo de la tipografía
+                    if (r > 200) {
+                        pointsCollected.push({ x, y });
+                    }
+                }
             }
 
+            // Ordenar los puntos con un algoritmo sutil de cercanía para que la re-animación sea fluida de izquierda a derecha
+            pointsCollected.sort((a, b) => a.x - b.x || a.y - b.y);
+
+            // Inyectamos de golpe los puntos en el historial nativo aplicando nuestras físicas orgánicas activas
+            if (pointsCollected.length > 0) {
+                // Nodo inicial simulado
+                addStrokePoint(pointsCollected[0].x, pointsCollected[0].y, true);
+                
+                pointsCollected.forEach((pt, idx) => {
+                    if (idx > 0) {
+                        addStrokePoint(pt.x, pt.y, false);
+                    }
+                });
+            }
+
+            document.getElementById('status-text').innerText = "Text Rendered Successfully";
+        }
+
+        // MODIFICADO: EXPORTACIÓN SIN BACKGROUND (TRANSPARENTE)
+        function saveAsset() {
+            if (strokeHistory.length === 0) { alert("Canvas is empty!"); return; }
+            
+            const activeRatio = document.querySelector('input[name="aspect-ratio"]:checked').value;
             const link = document.createElement('a');
-            link.download = `transparent-blob-${activeRatio.replace(':', 'x')}-${Date.now()}.png`;
-            link.href = exportCanvas.toDataURL('image/png');
+            link.download = `asset-trans-master-${activeRatio.replace(':', 'x')}-${Date.now()}.png`;
+            
+            // TRUCO CODING: Borramos el fondo obscuro temporalmente para capturar la transparencia del PNG
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Redibujamos las formas solas directamente sobre el vacío
+            for(let pt of strokeHistory) {
+                drawEchos(ctx, pt.x, pt.y, pt.shape, pt.size, pt.cCenter, pt.cEcho1, pt.cEcho2, pt.stroke, pt.blur);
+            }
+
+            // Guardamos el buffer transparente nativo del navegador en PNG
+            link.href = canvas.toDataURL('image/png');
             link.click();
+
+            // Restauramos el entorno obscuro inmediatamente para mantener la consistencia en el monitor del usuario
+            redrawFromHistory();
         }
 
         function clearCanvas() {
