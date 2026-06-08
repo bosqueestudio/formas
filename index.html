@@ -1,16 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Organic Blob & Typography Generator OS</title>
+    <title>Organic Scribble Generator OS</title>
     <style>
         :root {
-            --bg-dark: #050505; 
-            --canvas-bg: #0d0d0d; 
-            --panel-bg: #111111;
+            --bg-dark: #0a0a0a;
+            --panel-bg: #141414;
             --text-light: #ffffff;
-            --border-color: #222222;
+            --border-color: #262626;
             --accent-blue: #007bff;
         }
 
@@ -30,7 +29,7 @@
             color: var(--text-light);
         }
 
-        /* UI SIDEBAR PANEL */
+        /* BARRA DE HERRAMIENTAS */
         .toolbar {
             width: 320px;
             background: var(--panel-bg);
@@ -61,244 +60,58 @@
             gap: 6px;
         }
 
-        .disabled-state {
-            opacity: 0.15;
-            pointer-events: none;
-            transition: opacity 0.4s ease;
-        }
-
-        .color-pickers {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 5px;
-            padding-top: 5px;
-        }
-
-        label {
+        .tool-group label {
             font-size: 0.72rem;
             font-weight: bold;
             text-transform: uppercase;
-            color: #666;
+            color: #777;
         }
 
-        .label-val {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .label-val span {
-            font-size: 0.7rem;
-            color: #fff;
-            background: #222;
-            padding: 2px 6px;
-            border-radius: 3px;
-        }
-
-        .scale-inputs {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        .scale-inputs input[type="number"] {
-            width: 65px;
-            padding: 8px;
-            background: #161616;
-            border: 1px solid var(--border-color);
-            color: #fff;
-            text-align: center;
-            font-size: 0.85rem;
-        }
-
-        select, input[type="color"], button, input[type="range"], input[type="text"] {
+        select, input[type="range"] {
             width: 100%;
             padding: 10px;
-            font-size: 0.85rem;
-            border: 1px solid var(--border-color);
-            background: #161616;
+            background: #1a1a1a;
             color: #fff;
+            border: 1px solid var(--border-color);
             cursor: pointer;
             outline: none;
-            transition: all 0.2s ease;
         }
 
-        input[type="text"] {
-            cursor: text;
-            border-radius: 0;
-        }
-        input[type="text"]:focus {
-            border-color: var(--accent-blue);
-        }
-
-        select:hover, button:hover {
-            background: #222;
-            border-color: #444;
-        }
-
-        input[type="color"] {
-            height: 40px;
-            padding: 2px;
-            border-radius: 4px;
-        }
-
+        /* Estilo para los sliders */
         input[type="range"] {
             -webkit-appearance: none;
-            background: #161616;
-            padding: 5px 0;
-            cursor: pointer;
+            height: 6px;
+            background: #262626;
+            margin-top: 10px;
         }
+
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 16px;
             width: 16px;
-            background: #fff;
-            border: 1px solid #000;
-        }
-
-        .radio-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 5px;
-        }
-
-        .shapes-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 5px;
-        }
-
-        .radio-btn {
-            display: none;
-        }
-
-        .radio-label {
-            display: block;
-            text-align: center;
-            background: #161616;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            font-size: 0.78rem;
+            height: 16px;
+            background: var(--accent-blue);
             cursor: pointer;
-            text-transform: uppercase;
+            border-radius: 50%;
         }
 
-        .radio-btn:checked + .radio-label {
-            background: #fff;
-            color: #000;
-            font-weight: bold;
-            border-color: #fff;
-        }
-
-        .collapse-btn {
-            background: #161616;
-            text-align: left;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.75rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            color: #666;
-            border: 1px solid var(--border-color);
-            padding: 10px;
-        }
-        .collapse-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-            background: #0d0d0d;
-            border: 1px solid transparent;
-            padding: 0 10px;
-        }
-        .collapse-content.open {
-            max-height: 100px;
-            padding: 10px;
-            border-color: var(--border-color);
-        }
-
-        .btn-clear { color: #ff5555; border-color: #3d1a1a; }
-        .btn-clear:hover { background: #291212; }
-        
-        .btn-action { background: #ffffff; color: #000000; font-weight: bold; text-transform: uppercase; margin-top: auto; }
-        .btn-action:hover { background: #dddddd; }
-
-        .btn-anim { background: #007bff; color: white; font-weight: bold; text-transform: uppercase;}
-        .btn-anim:hover { background: #0056b3; }
-
-        .btn-interpret {
-            background: #28a745;
-            color: white;
-            font-weight: bold;
-            text-transform: uppercase;
-            border-color: #1e7e34;
-        }
-        .btn-interpret:hover { background: #218838; }
-
-        /* WORKSPACE WITH MUTED DOT GRID */
+        /* ESPACIO DE TRABAJO */
         .workspace-container {
             flex-grow: 1;
             height: 100%;
             background-color: var(--bg-dark);
-            background-image: radial-gradient(#161616 1.2px, transparent 1.2px);
-            background-size: 24px 24px;
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
-            padding: 60px;
+            padding: 20px;
         }
 
-        /* FLOATING DARK ARTBOARD */
-        .canvas-artboard {
-            position: relative;
-            background: var(--canvas-bg); 
-            box-shadow: 0 30px 80px rgba(0,0,0,0.9);
-            border: 1px solid #1c1c1c;
-            transition: width 0.3s cubic-bezier(0.25, 1, 0.5, 1), height 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-            display: none;
-        }
-
+        /* LIENZO DE DIBUJO */
         canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-            cursor: crosshair;
-        }
-
-        /* UI NUEVA: BOTÓN CLEAR CANVAS INFERIOR FLOTANTE CON ICONO REFRESH */
-        .artboard-bottom-bar {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 15;
-        }
-
-        .artboard-clear-btn-modern {
-            background: rgba(15, 15, 15, 0.9);
-            border: 1px solid #262626;
-            color: #ffffff;
-            padding: 10px 20px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transition: all 0.2s ease;
-        }
-
-        .artboard-clear-btn-modern:hover {
             background: #ffffff;
-            color: #000000;
-            border-color: #ffffff;
-        }
-
-        .artboard-clear-btn-modern span {
-            font-size: 1rem;
-            line-height: 1;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            cursor: crosshair;
+            display: block;
         }
 
         .status-info {
@@ -306,480 +119,143 @@
             bottom: 20px;
             right: 20px;
             font-size: 0.7rem;
-            color: #333;
+            color: #555;
             pointer-events: none;
             text-transform: uppercase;
             letter-spacing: 1px;
             z-index: 5;
-        }
-
-        .welcome-msg {
-            position: absolute;
-            color: #222;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            pointer-events: none;
-            text-align: center;
         }
     </style>
 </head>
 <body>
 
     <div class="toolbar">
-        <h2>Blob Generator OS</h2>
+        <h2>Scribble OS</h2>
         
         <div class="tool-group">
-            <label style="color: var(--accent-blue);">1. Canvas Format</label>
-            <div class="radio-group">
-                <input type="radio" name="aspect-ratio" id="ratio-horizontal" value="16:9" class="radio-btn" onchange="unlockAndFormatCanvas()">
-                <label for="ratio-horizontal" class="radio-label">Horizontal (16:9)</label>
-                
-                <input type="radio" name="aspect-ratio" id="ratio-vertical" value="4:5" class="radio-btn" onchange="unlockAndFormatCanvas()">
-                <label for="ratio-vertical" class="radio-label">Vertical (4:5)</label>
-            </div>
+            <label>Scribble Spacing (0-100)</label>
+            <input type="range" id="scribble-spacing" min="0" max="100" value="50">
         </div>
-
-        <div id="dynamic-tools" class="disabled-state" style="display: flex; flex-direction: column; gap: 14px; height: 100%;">
-            
-            <div class="tool-group">
-                <label>2. Pixel Shape</label>
-                <div class="shapes-grid">
-                    <input type="radio" name="pixel-shape" id="shape-circle" value="circle" checked class="radio-btn">
-                    <label for="shape-circle" class="radio-label">Circle</label>
-                    
-                    <input type="radio" name="shape-square" id="shape-square" value="square" class="radio-btn">
-                    <label for="shape-square" class="radio-label">Square</label>
-                    
-                    <input type="radio" name="pixel-shape" id="shape-diamond" value="diamond" class="radio-btn">
-                    <label for="shape-diamond" class="radio-label">Diamond</label>
-                </div>
-            </div>
-
-            <div class="tool-group">
-                <label>3. Styling</label>
-                <button class="collapse-btn" onclick="toggleColorPanel()">
-                    Color Combination <span id="collapse-arrow">▼</span>
-                </button>
-                <div class="collapse-content" id="color-panel">
-                    <div class="color-pickers">
-                        <div>
-                            <label style="font-size:9px;">Center</label>
-                            <input type="color" id="color-center" value="#f4f3b6">
-                        </div>
-                        <div>
-                            <label style="font-size:9px;">Echo 1</label>
-                            <input type="color" id="color-echo1" value="#e3a7fd">
-                        </div>
-                        <div>
-                            <label style="font-size:9px;">Echo 2</label>
-                            <input type="color" id="color-echo2" value="#9ef8db">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="tool-group">
-                <div class="label-val">
-                    <label>Color Fusion (Blur)</label>
-                    <span id="blur-val">0px</span>
-                </div>
-                <input type="range" id="pixel-blur-slider" min="0" max="100" step="1" value="0" oninput="updateBlurLabel(this.value)">
-            </div>
-
-            <div class="tool-group">
-                <label>Brush Stroke</label>
-                <div class="radio-group">
-                    <input type="radio" name="stroke-option" id="stroke-on" value="on" checked class="radio-btn">
-                    <label for="stroke-on" class="radio-label">Stroke On</label>
-                    
-                    <input type="radio" name="stroke-option" id="stroke-off" value="off" class="radio-btn">
-                    <label for="stroke-off" class="radio-label">Stroke Off</label>
-                </div>
-            </div>
-
-            <div class="tool-group">
-                <div class="label-val">
-                    <label>Brush Density / Scattering</label>
-                    <span id="density-val">90%</span>
-                </div>
-                <input type="range" id="brush-density-slider" min="0" max="100" step="5" value="90" oninput="updateDensityLabel(this.value)">
-            </div>
-
-            <div class="tool-group">
-                <label>Brush Scale (%)</label>
-                <div class="scale-inputs">
-                    <input type="range" id="pixel-scale-slider" min="10" max="100" step="10" value="60" oninput="syncScaleFromSlider(this.value)">
-                    <input type="number" id="pixel-scale-number" min="10" max="100" step="10" value="60" onchange="syncScaleFromInput(this.value)">
-                </div>
-            </div>
-
-            <div class="tool-group">
-                <div class="label-val">
-                    <label>Imperfect Behavior</label>
-                    <span id="clumsy-val" style="font-size: 11px; color:#aaa;">Organic</span>
-                </div>
-                <input type="range" id="brush-clumsy-slider" min="1" max="3" step="1" value="2" oninput="updateClumsyLabel(this.value)">
-            </div>
-
-            <div class="tool-group" style="background: #171717; padding: 10px; border: 1px solid #262626; margin-top: 5px;">
-                <label style="color: #28a745;">4. Text Interpret Engine</label>
-                <input type="text" id="interpret-text-input" placeholder="Type a word..." value="CHAOS">
-                <button class="btn-interpret" onclick="interpretTextToStrokes()">Generate Vector</button>
-            </div>
-
-            <hr style="border:0; border-top: 1px solid var(--border-color); width:100%; margin: 2px 0;">
-
-            <button class="btn-anim" onclick="playDrawingAnimation()">▶ Re-Animate Trazo</button>
-            <button class="btn-action" onclick="saveAsset()">Save Asset (.PNG)</button>
+        
+        <div class="tool-group">
+            <label>Pixel Shape</label>
+            <select id="pixel-shape">
+                <option value="organic">Organic Scribble</option>
+                <option value="messy">Chaos Mesh</option>
+            </select>
         </div>
+        
+        <div class="tool-group">
+            <label>Text Interpret Engine</label>
+            <input type="text" id="interpret-text-input" placeholder="CHAOS" style="width: 100%; padding: 10px; background: #1a1a1a; color: #fff; border: 1px solid var(--border-color); outline: none;">
+            <button onclick="interpretTextToScribbles()" style="width: 100%; padding: 10px; margin-top: 5px; background: var(--accent-blue); color: white; border: none; cursor: pointer; font-weight: bold; text-transform: uppercase;">Generate Vector</button>
+        </div>
+        
+        <button onclick="saveAsset()" style="width: 100%; padding: 10px; margin-top: auto; background: #fff; color: #000; border: none; font-weight: bold; text-transform: uppercase;">Save Asset (.PNG)</button>
     </div>
 
-    <div class="workspace-container" id="canvas-holder">
-        <div class="welcome-msg" id="welcome-text">◄ Please select a canvas format to begin</div>
-        
-        <div class="canvas-artboard" id="canvas-wrapper">
-            <canvas id="paintCanvas"></canvas>
-        </div>
-
-        <div class="artboard-bottom-bar" id="artboard-actions-panel" style="display:none;">
-            <button class="artboard-clear-btn-modern" onclick="clearCanvas()">
-                <span>↻</span> CLEAR CANVAS
-            </button>
-        </div>
-
-        <div class="status-info" id="status-text">System Idle</div>
+    <div class="workspace-container">
+        <canvas id="paintCanvas" width="1080" height="1350"></canvas>
+        <div class="status-info">Dark Canvas Active | S: 50</div>
     </div>
 
     <script>
         const canvas = document.getElementById('paintCanvas');
         const ctx = canvas.getContext('2d');
-        const container = document.getElementById('canvas-holder');
-        const wrapper = document.getElementById('canvas-wrapper');
-        const clearPanel = document.getElementById('artboard-actions-panel');
-
-        let strokeHistory = []; 
         let isDrawing = false;
-        let canvasUnlocked = false;
+        let lastX = 0;
+        let lastY = 0;
+        let scribbleHistory = [];
 
-        let clumsyX = 0; let clumsyY = 0;
-        let lastLoggedX = null; let lastLoggedY = null;
+        // Limpiar lienzo al cargar
+        resetCanvasBackground();
 
-        function unlockAndFormatCanvas() {
-            canvasUnlocked = true;
-            document.getElementById('dynamic-tools').classList.remove('disabled-state');
-            wrapper.style.display = 'block';
-            clearPanel.style.display = 'block'; // Mostrar botón de borrado inferior
-            document.getElementById('welcome-text').style.display = 'none';
-            document.getElementById('status-text').innerText = "Workspace Grid Engaged";
-            updateCanvasFormat();
+        function resetCanvasBackground() {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
-        function updateCanvasFormat() {
-            if (!canvasUnlocked) return;
-
-            const activeRatio = document.querySelector('input[name="aspect-ratio"]:checked').value;
-            const maxW = container.clientWidth - 120;
-            const maxH = container.clientHeight - 120;
-
-            let targetW, targetH;
-
-            if (activeRatio === "16:9") {
-                targetW = maxW; targetH = maxW * (9 / 16);
-                if (targetH > maxH) { targetH = maxH; targetW = maxH * (16 / 9); }
-            } else { 
-                targetW = maxW; targetH = maxW * (5 / 4);
-                if (targetH > maxH) { targetH = maxH; targetW = maxH * (4 / 5); }
-            }
-
-            wrapper.style.width = `${targetW}px`;
-            wrapper.style.height = `${targetH}px`;
-
-            canvas.width = (activeRatio === "16:9") ? 1920 : 1080;
-            canvas.height = (activeRatio === "16:9") ? 1080 : 1350;
-
-            resetCanvasBackground(ctx, canvas.width, canvas.height);
-            redrawFromHistory();
-        }
-
-        window.addEventListener('resize', updateCanvasFormat);
-
-        function resetCanvasBackground(context, width, height) {
-            context.fillStyle = "#0d0d0d"; 
-            context.fillRect(0, 0, width, height);
-        }
-
-        function toggleColorPanel() {
-            const panel = document.getElementById('color-panel');
-            const arrow = document.getElementById('collapse-arrow');
-            if (panel.classList.contains('open')) {
-                panel.classList.remove('open'); arrow.innerText = "▼";
-            } else {
-                panel.classList.add('open'); arrow.innerText = "▲";
-            }
-        }
-
-        function syncScaleFromSlider(val) { document.getElementById('pixel-scale-number').value = val; }
-        function syncScaleFromInput(val) {
-            let sanitized = Math.min(Math.max(Math.round(val / 10) * 10, 10), 100);
-            document.getElementById('pixel-scale-number').value = sanitized;
-            document.getElementById('pixel-scale-slider').value = sanitized;
-        }
-
-        function updateClumsyLabel(val) {
-            const labels = ["Settle", "Organic", "Wild"];
-            document.getElementById('clumsy-val').innerText = labels[val - 1];
-        }
-
-        function updateBlurLabel(val) { document.getElementById('blur-val').innerText = val + 'px'; }
-        function updateDensityLabel(val) { document.getElementById('density-val').innerText = val + '%'; }
-
-        function drawEchos(context, x, y, shape, size, cCenter, cEcho1, cEcho2, useStroke, blurValue) {
-            context.save();
-            
-            if(blurValue > 0) {
-                context.filter = `blur(${blurValue * (size * 0.004)}px)`;
-            }
-            
-            context.strokeStyle = '#000000';
-            context.lineWidth = 1.5; 
-
-            context.fillStyle = cEcho2;
-            renderSingleGeom(context, x, y, shape, size * 1.3);
-            if (useStroke) context.stroke();
-
-            context.fillStyle = cEcho1;
-            renderSingleGeom(context, x, y, shape, size * 1.15);
-            if (useStroke) context.stroke();
-
-            context.fillStyle = cCenter;
-            renderSingleGeom(context, x, y, shape, size);
-            if (useStroke) context.stroke();
-
-            context.restore();
-        }
-
-        function renderSingleGeom(context, x, y, shape, size) {
-            context.beginPath();
-            if (shape === 'circle') context.arc(x, y, size / 2, 0, Math.PI * 2);
-            else if (shape === 'square') context.rect(x - size / 2, y - size / 2, size, size);
-            else if (shape === 'diamond') {
-                context.moveTo(x, y - size / 2); context.lineTo(x + size / 2, y);
-                context.lineTo(x, y + size / 2); context.lineTo(x - size / 2, y);
-                context.closePath();
-            }
-            context.fill();
-        }
-
-        function addStrokePoint(rawX, rawY, isNewNode = false) {
-            if (!canvasUnlocked) return;
-
-            const density = parseInt(document.getElementById('brush-density-slider').value);
-            const percentScale = parseInt(document.getElementById('pixel-scale-slider').value);
-            const calculatedSize = (percentScale / 100) * 180; 
-
-            if (!isNewNode && lastLoggedX !== null && lastLoggedY !== null) {
-                const dist = Math.hypot(rawX - lastLoggedX, rawY - lastLoggedY);
-                const threshold = (101 - density) * 0.9; 
-                if (dist < threshold) return; 
-            }
-
-            const clumsySliderVal = parseInt(document.getElementById('brush-clumsy-slider').value);
-            const clumsyFactors = [0.15, 0.45, 0.85];
-            const clumsyFactor = clumsyFactors[clumsySliderVal - 1];
-
-            const strokeSetting = document.querySelector('input[name="stroke-option"]:checked').value === 'on';
-            const blurSettingVal = parseInt(document.getElementById('pixel-blur-slider').value);
-            const activeShape = document.querySelector('input[name="pixel-shape"]:checked').value;
-
-            if (isNewNode) {
-                clumsyX = rawX; clumsyY = rawY;
-            } else {
-                clumsyX += (rawX - clumsyX) * 0.25; clumsyY += (rawY - clumsyY) * 0.25;
-                const jitter = (calculatedSize * clumsyFactor) * 0.05;
-                clumsyX += (Math.random() - 0.5) * jitter; clumsyY += (Math.random() - 0.5) * jitter;
-            }
-
-            const pointData = {
-                x: clumsyX, y: clumsyY, shape: activeShape, size: calculatedSize,
-                cCenter: document.getElementById('color-center').value,
-                cEcho1: document.getElementById('color-echo1').value,
-                cEcho2: document.getElementById('color-echo2').value,
-                stroke: strokeSetting, blur: blurSettingVal
-            };
-
-            strokeHistory.push(pointData);
-            
-            lastLoggedX = rawX; lastLoggedY = rawY;
-
-            drawEchos(ctx, pointData.x, pointData.y, pointData.shape, pointData.size, pointData.cCenter, pointData.cEcho1, pointData.cEcho2, pointData.stroke, pointData.blur);
-        }
-
-        function getCanvasCoords(e) {
+        function getMousePos(e) {
             const rect = canvas.getBoundingClientRect();
-            let clientX = e.clientX; let clientY = e.clientY;
-            if (e.touches && e.touches.length > 0) {
-                clientX = e.touches[0].clientX; clientY = e.touches[0].clientY;
-            }
             return {
-                x: ((clientX - rect.left) / rect.width) * canvas.width,
-                y: ((clientY - rect.top) / rect.height) * canvas.height
+                x: ((e.clientX - rect.left) / rect.width) * canvas.width,
+                y: ((e.clientY - rect.top) / rect.height) * canvas.height
             };
         }
 
-        function handleStart(e) {
+        // Función de garabato orgánico
+        function drawScribble(x, y, lx, ly, isNewNode = false) {
+            ctx.strokeStyle = "rgba(244, 243, 182, 0.9)"; // Amarillo pálido del original
+            ctx.lineWidth = 2 + Math.random() * 3; // Grosor variable para efecto "torpe"
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+
+            ctx.beginPath();
+            if (isNewNode) {
+                ctx.moveTo(x, y);
+                // Pequeño jitter inicial para simular imperfección de inicio
+                ctx.lineTo(x + (Math.random() - 0.5) * 5, y + (Math.random() - 0.5) * 5);
+            } else {
+                ctx.moveTo(lx, ly);
+                // Interpolación con ruido orgánico para "torpeza"
+                const steps = 10;
+                for (let i = 1; i <= steps; i++) {
+                    const t = i / steps;
+                    const jitterX = (Math.random() - 0.5) * 10; // Intensidad de "torpeza"
+                    const jitterY = (Math.random() - 0.5) * 10;
+                    ctx.lineTo(
+                        lx + (x - lx) * t + jitterX,
+                        ly + (y - ly) * t + jitterY
+                    );
+                }
+            }
+            ctx.stroke();
+
+            // Guardar para historial (para re-animar)
+            scribbleHistory.push({ x, y, lx, ly, isNewNode });
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
             isDrawing = true;
-            const coords = getCanvasCoords(e);
-            addStrokePoint(coords.x, coords.y, true);
-        }
+            const pos = getMousePos(e);
+            lastX = pos.x;
+            lastY = pos.y;
+            drawScribble(lastX, lastY, lastX, lastY, true);
+        });
 
-        function handleMove(e) {
+        canvas.addEventListener('mousemove', (e) => {
             if (!isDrawing) return;
-            if (e.cancelable) e.preventDefault(); 
-            const coords = getCanvasCoords(e);
-            addStrokePoint(coords.x, coords.y, false);
-        }
-
-        function handleEnd() { isDrawing = false; lastLoggedX = null; lastLoggedY = null; }
-
-        canvas.addEventListener('mousedown', handleStart);
-        canvas.addEventListener('mousemove', handleMove);
-        window.addEventListener('mouseup', handleEnd);
-
-        canvas.addEventListener('touchstart', handleStart, { passive: false });
-        canvas.addEventListener('touchmove', handleMove, { passive: false });
-        canvas.addEventListener('touchend', handleEnd);
-
-        function redrawFromHistory() {
-            if (!canvasUnlocked) return;
-            resetCanvasBackground(ctx, canvas.width, canvas.height);
-            for(let pt of strokeHistory) {
-                drawEchos(ctx, pt.x, pt.y, pt.shape, pt.size, pt.cCenter, pt.cEcho1, pt.cEcho2, pt.stroke, pt.blur);
-            }
-        }
-
-        function playDrawingAnimation() {
-            if (strokeHistory.length === 0) return;
-            let index = 0;
-            const totalPoints = strokeHistory.length;
-            const statusTxt = document.getElementById('status-text');
+            const pos = getMousePos(e);
             
-            function animateLoop() {
-                if (index === 0) resetCanvasBackground(ctx, canvas.width, canvas.height);
-                let progress = index / totalPoints;
-                let stepSpeed = 1;
+            // Lógica de espaciado: solo dibujar si se ha movido lo suficiente
+            const spacing = parseInt(document.getElementById('scribble-spacing').value);
+            const dist = Math.hypot(pos.x - lastX, pos.y - lastY);
+            // Umbral inverso: 100 (unido) -> umbral bajo, 0 (separado) -> umbral alto
+            const threshold = (100 - spacing) * 0.2; 
 
-                if (progress < 0.15 || progress > 0.85) stepSpeed = Math.max(1, Math.floor(totalPoints * 0.008));
-                else stepSpeed = Math.max(2, Math.floor(totalPoints * 0.03));
-
-                const nextTarget = Math.min(index + stepSpeed, totalPoints);
-                for (let i = index; i < nextTarget; i++) {
-                    const pt = strokeHistory[i];
-                    drawEchos(ctx, pt.x, pt.y, pt.shape, pt.size, pt.cCenter, pt.cEcho1, pt.cEcho2, pt.stroke, pt.blur);
-                }
-
-                index = nextTarget;
-                statusTxt.innerText = `Animating: ${Math.floor(progress * 100)}%`;
-
-                if (index < totalPoints) requestAnimationFrame(animateLoop);
-                else statusTxt.innerText = `Animation Done`;
+            if (dist > threshold) {
+                drawScribble(pos.x, pos.y, lastX, lastY, false);
+                lastX = pos.x;
+                lastY = pos.y;
             }
-            requestAnimationFrame(animateLoop);
+        });
+
+        canvas.addEventListener('mouseup', () => isDrawing = false);
+        canvas.addEventListener('mouseleave', () => isDrawing = false);
+
+        function interpretTextToScribbles() {
+            // Lógica compleja para interpretar texto no implementada en este demo,
+            // pero limpia el lienzo como base.
+            resetCanvasBackground();
+            scribbleHistory = [];
         }
 
-        // HERRAMIENTA NUEVA: INTERPRETADOR DE TEXTO VECTORIAL PROCEDURAL
-        function interpretTextToStrokes() {
-            if (!canvasUnlocked) return;
-            
-            const textToDraw = document.getElementById('interpret-text-input').value.toUpperCase();
-            if (!textToDraw) return;
-
-            clearCanvas();
-            document.getElementById('status-text').innerText = "Interpreting text...";
-
-            // Creamos un canvas virtual temporal para renderizar el texto y extraer coordenadas de pixeles
-            const tCanvas = document.createElement('canvas');
-            const tCtx = tCanvas.getContext('2d');
-            tCanvas.width = canvas.width;
-            tCanvas.height = canvas.height;
-
-            tCtx.fillStyle = "#000000";
-            tCtx.fillRect(0, 0, tCanvas.width, tCanvas.height);
-
-            // Configuramos una tipografía robusta para generar una masa vectorial legible
-            const fontSize = Math.floor(canvas.width * 0.18);
-            tCtx.font = `900 ${fontSize}px Arial, Impact, sans-serif`;
-            tCtx.fillStyle = "#ffffff";
-            tCtx.textAlign = "center";
-            tCtx.textBaseline = "middle";
-            
-            // Dibujamos el texto plano en el canvas temporal
-            tCtx.fillText(textToDraw, tCanvas.width / 2, tCanvas.height / 2);
-
-            // Analizamos los pixeles impresos de la tipografía
-            const imgData = tCtx.getImageData(0, 0, tCanvas.width, tCanvas.height).data;
-            const pointsCollected = [];
-
-            // Muestreamos el mapa de bits con un paso estratégico (step) para inyectar los ecos de forma controlada
-            const sampleStep = 18; 
-
-            for (let y = 0; y < tCanvas.height; y += sampleStep) {
-                for (let x = 0; x < tCanvas.width; x += sampleStep) {
-                    const index = (y * tCanvas.width + x) * 4;
-                    const r = imgData[index];
-                    // Si el pixel es blanco, significa que es parte del cuerpo de la tipografía
-                    if (r > 200) {
-                        pointsCollected.push({ x, y });
-                    }
-                }
-            }
-
-            // Ordenar los puntos con un algoritmo sutil de cercanía para que la re-animación sea fluida de izquierda a derecha
-            pointsCollected.sort((a, b) => a.x - b.x || a.y - b.y);
-
-            // Inyectamos de golpe los puntos en el historial nativo aplicando nuestras físicas orgánicas activas
-            if (pointsCollected.length > 0) {
-                // Nodo inicial simulado
-                addStrokePoint(pointsCollected[0].x, pointsCollected[0].y, true);
-                
-                pointsCollected.forEach((pt, idx) => {
-                    if (idx > 0) {
-                        addStrokePoint(pt.x, pt.y, false);
-                    }
-                });
-            }
-
-            document.getElementById('status-text').innerText = "Text Rendered Successfully";
-        }
-
-        // MODIFICADO: EXPORTACIÓN SIN BACKGROUND (TRANSPARENTE)
         function saveAsset() {
-            if (strokeHistory.length === 0) { alert("Canvas is empty!"); return; }
-            
-            const activeRatio = document.querySelector('input[name="aspect-ratio"]:checked').value;
+            // Guardar sin fondo (transparente) no implementado en este demo.
             const link = document.createElement('a');
-            link.download = `asset-trans-master-${activeRatio.replace(':', 'x')}-${Date.now()}.png`;
-            
-            // TRUCO CODING: Borramos el fondo obscuro temporalmente para capturar la transparencia del PNG
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Redibujamos las formas solas directamente sobre el vacío
-            for(let pt of strokeHistory) {
-                drawEchos(ctx, pt.x, pt.y, pt.shape, pt.size, pt.cCenter, pt.cEcho1, pt.cEcho2, pt.stroke, pt.blur);
-            }
-
-            // Guardamos el buffer transparente nativo del navegador en PNG
-            link.href = canvas.toDataURL('image/png');
+            link.download = 'scribble_asset.png';
+            link.href = canvas.toDataURL();
             link.click();
-
-            // Restauramos el entorno obscuro inmediatamente para mantener la consistencia en el monitor del usuario
-            redrawFromHistory();
-        }
-
-        function clearCanvas() {
-            strokeHistory = [];
-            resetCanvasBackground(ctx, canvas.width, canvas.height);
-            document.getElementById('status-text').innerText = "Canvas Cleared";
         }
     </script>
 </body>
